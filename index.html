@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">         
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 馬年日本精選伴手禮預購</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --wagashi-red: #B02A2A;   
+            --gold: #C5A059;          
+            --paper-white: #F9F8F6;   
+            --sumi-black: #1A1A1A;    
+            --line-green: #06C755;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--paper-white);
+            color: var(--sumi-black);
+            padding-bottom: 120px; 
+            scroll-behavior: smooth;
+        }
+ 
+        .font-serif { font-family: 'Noto Serif TC', serif; }
+        .text-wagashi { color: var(--wagashi-red); }
+        .bg-wagashi { background-color: var(--wagashi-red); }
+        .text-gold { color: var(--gold); }
+        
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+ 
+        .brand-image-container {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            background-color: #f3f4f6; 
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+ 
+        .img-loading::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            z-index: 1;
+        }
+ 
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+ 
+        .brand-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0; 
+            transition: opacity 0.5s ease-in;
+            z-index: 2;
+        }
+ 
+        .brand-image-container img.loaded {
+            opacity: 1;
+        }
+ 
+        .btn-qty { transition: all 0.2s; user-select: none; }
+        .btn-qty:active { transform: scale(0.85); }
+ 
+        .modal { transition: opacity 0.3s ease-in-out; }
+        .modal-content { transform: scale(0.95); transition: transform 0.3s ease-in-out; }
+        .modal.active .modal-content { transform: scale(1); }
+        
+        .bg-line { background-color: var(--line-green); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body id="top">
+ 
+    <!-- 免運進度條 -->
+    <div class="sticky-header py-3 px-4 border-b border-gold/20">
+        <div class="max-w-2xl mx-auto text-center">
+            <div class="flex justify-between text-[11px] font-bold mb-1">
+                <span id="shipping-msg">滿 $1,500 享超取免運</span>
+                <span class="text-wagashi font-serif" id="shipping-target">$3,000 宅配免運</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                <div id="progress-bar" class="bg-gradient-to-r from-yellow-500 to-red-600 h-full transition-all duration-700" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+ 
+    <!-- Header -->
+    <header class="bg-wagashi text-white text-center py-10 px-4 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10" style="background-image: url('https://www.transparenttextures.com/patterns/japanese-sayagata.png');"></div>
+        <div class="relative z-10 max-w-2xl mx-auto">
+            <p class="text-gold text-xs tracking-[0.4em] mb-2 font-serif">歲次丙午 ‧ 靈馬呈祥</p>
+            <h1 class="text-3xl font-black font-serif tracking-widest mb-2">2026 日本精選伴手禮</h1>
+            <div class="inline-block bg-white/10 backdrop-blur px-4 py-1 rounded-full text-[11px] font-bold tracking-widest">
+                📅 時程公告：預計 2026.01.27 陸續發貨
+            </div>
+        </div>
+    </header>
+ 
+    <main class="max-w-2xl mx-auto px-4 py-8">
+        <div id="product-container" class="grid grid-cols-1 gap-8">
+            <!-- JS 渲染點 -->
+        </div>
+ 
+        <!-- 預購表單 -->
+        <div class="mt-20 pt-10 border-t-2 border-dotted border-gray-300">
+            <h2 class="text-2xl font-serif font-bold text-center mb-10 flex items-center justify-center">
+                <span class="text-gold text-xl mr-3">✦</span> 預購資料登記 <span class="text-gold text-xl ml-3">✦</span>
+            </h2>
+ 
+            <form id="order-form-el" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">姓名 <span class="text-red-500">*</span></label>
+                        <input type="text" id="name" required class="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-wagashi bg-transparent" placeholder="您的稱呼">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">聯絡電話 <span class="text-red-500">*</span></label>
+                        <input type="tel" id="phone" required class="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-wagashi bg-transparent" placeholder="09xx-xxx-xxx">
+                    </div>
+                </div>
+ 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">LINE 名稱 <span class="text-red-500">*</span></label>
+                        <input type="text" id="line" required class="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-wagashi bg-transparent" placeholder="方便聯繫對帳">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">配送方式 <span class="text-red-500">*</span></label>
+                        <select id="shippingMethod" required class="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-wagashi bg-transparent appearance-none">
+                            <option value="" disabled selected>請選擇配送方式</option>
+                            <option value="超商取貨">超商取貨 ($60 / 滿$1500免運)</option>
+                            <option value="宅配到府">宅配到府 ($210 / 滿$3000免運)</option>
+                        </select>
+                    </div>
+                </div>
+ 
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1">收件地址 / 超商門市與店號 <span class="text-red-500">*</span></label>
+                    <input type="text" id="address" required class="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-wagashi bg-transparent" placeholder="請填寫完整地址或超商店名">
+                </div>
+ 
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1">訂單備註</label>
+                    <input type="text" id="note" class="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-wagashi bg-transparent" placeholder="若有特殊需求請在此輸入">
+                </div>
+ 
+                <div class="flex items-center gap-3 pt-2">
+                    <input type="checkbox" id="tax-toggle" class="w-4 h-4 accent-[#B02A2A]">
+                    <label for="tax-toggle" class="text-sm font-medium text-gray-700 cursor-pointer">需要開立統一編號 (+5% 稅金)</label>
+                </div>
+ 
+                <div id="tax-input-group" class="hidden">
+                    <label class="block text-xs font-bold text-gray-500 mb-1">統一編號</label>
+                    <input type="text" id="taxId" maxlength="8" class="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-wagashi bg-transparent" placeholder="請輸入 8 位數統編">
+                </div>
+            </form>
+        </div>
+    </main>
+ 
+    <!-- 底部資訊欄 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 p-4 z-40 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+        <div class="max-w-2xl mx-auto flex justify-between items-center">
+            <div class="flex flex-col">
+                <span id="discount-hint" class="text-[9px] text-green-600 font-bold h-3"></span>
+                <span class="text-2xl font-black text-wagashi font-serif"><span class="text-xs text-gray-400 font-sans font-medium mr-1">總金額</span>NT$ <span id="footer-total">0</span></span>
+            </div>
+            <button id="pre-submit-btn" class="bg-wagashi text-white px-10 py-3 rounded-full font-bold shadow-lg shadow-red-900/20 active:scale-95 transition-transform tracking-widest text-sm">
+                確認預購
+            </button>
+        </div>
+    </div>
+ 
+    <!-- Modal 彈窗 -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4 modal opacity-0 pointer-events-none">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-content flex flex-col max-h-[90vh]">
+            <div id="modal-header" class="bg-wagashi text-white py-4 px-6 text-center relative flex-shrink-0">
+                <h3 id="modal-title" class="font-serif font-bold tracking-widest">核對訂單內容</h3>
+                <button id="close-modal" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white">✕</button>
+            </div>
+            <div id="modal-body" class="p-6 overflow-y-auto grow no-scrollbar bg-white"></div>
+            <div id="modal-footer-btns" class="p-4 border-t border-gray-100 bg-gray-50 flex gap-3 flex-shrink-0">
+                <button id="back-edit-btn" class="flex-1 py-3 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded-xl transition-colors">修改內容</button>
+                <button id="confirm-submit-btn" class="flex-1 py-3 text-sm font-bold bg-wagashi text-white rounded-xl shadow-md hover:brightness-110">確認送出</button>
+            </div>
+        </div>
+    </div>
+ 
+    <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwNOBXw2o-6mTnJYxGY1zy1aZ7rgUHMrkq3opGYjJs576o3xUz0L3xDwWXhVboi2ApE5A/exec";
+ 
+        const productsData = [
+            { brand: "主廚市集", image: "https://github.com/kg33813-tech/my-shop-assets/blob/main/chefsmart1.png?raw=true", items: [
+                { id: "cs1", name: "烏魚子禮盒240g", price: 1280, life: "約1年" },
+                { id: "cs2", name: "松葉蟹禮盒750g", price: 1880, life: "約2年" },
+                { id: "cs3", name: "松葉蟹雙拼 (蟹鉗200g+蟹腳100g)", price: 888, life: "約2年" },
+                { id: "cs4", name: "湛藍鮮選（松葉蟹腳100g+廣島牡蠣1kg+魷魚冰卷200g）", price: 1288, life: "約1年" },
+                { id: "cs5", name: "極海珍選（松葉蟹鉗200g+喜知次700g+花枝200g）", price: 1288, life: "約2年" },
+                { id: "cs6", name: "尊享海宴（湛藍鮮選＋極海珍選）", price: 2488, life: "約1年" }
+            ]},
+            { brand: "God Bless Butter", 
+                image: "https://github.com/kg33813-tech/my-shop-assets/blob/main/God%20Bless%20Butter.png?raw=true",
+                items: [
+                    { id: "gb1", name: "奶油白巧克力捲心酥-10入", price: 490, life: "約30天" },
+                    { id: "gb2", name: "奶油白巧克力捲心酥-18入", price: 780, life: "約30天" },
+                    { id: "gb3", name: "奶油白巧克力捲心酥-25入", price: 1020, life: "約30天" }
+                ]
+            },
+            { 
+                brand: "Sabrina-薫るバタ", 
+                image: "https://github.com/kg33813-tech/my-shop-assets/blob/main/Sabrina1.png?raw=true",
+                items: [
+                    { id: "sb1", name: "花朵千層酥-6入紙盒", price: 500, life: "約30天" },
+                    { id: "sb2", name: "花朵千層酥-8入經濟包", price: 580, life: "約30天" }
+                ]
+            },
+            { 
+                brand: "小倉山莊", 
+                image: "https://github.com/kg33813-tech/my-shop-assets/blob/main/ogurasansou1.png?raw=true",
+                items: [
+                    { id: "og1", name: "山春秋-10入經濟包", price: 460, life: "約60天" },
+                    { id: "og2", name: "山春秋-20入經濟包", price: 790, life: "約60天" },
+                    { id: "og3", name: "山春秋-8入紙盒", price: 550, life: "約60天" },
+                    { id: "og4", name: "山春秋-12入鐵盒", price: 880, life: "約60天" },
+                    { id: "og5", name: "山春秋-16入鐵盒", price: 1080, life: "約60天" }
+                ]
+            },
+            { 
+                brand: "NY Perfect Cheese", 
+                image: "https://github.com/kg33813-tech/my-shop-assets/blob/main/NY%20Perfect%20Cheese.png?raw=true",
+                items: [
+                    { id: "ny1", name: "起司奶油捲餅-8入", price: 490, life: "約60天" },
+                    { id: "ny2", name: "起司奶油捲餅-12入", price: 700, life: "約60天" }
+                ]
+            },
+            { 
+                brand: "Henri Charpentier", 
+                image: "https://github.com/kg33813-tech/my-shop-assets/blob/main/Henri%20Charpentier.png?raw=true",
+                items: [
+                    { id: "hc1", name: "費南雪-5入", price: 380, life: "約30天" },
+                    { id: "hc2", name: "費南雪-8入", price: 550, life: "約30天" }
+                ]
+            },
+            { 
+                brand: "Yoku Moku", 
+                image: "https://github.com/kg33813-tech/my-shop-assets/blob/main/Yoku%20Moku.png?raw=true",
+                items: [
+                    { id: "ym1", name: "雪茄蛋捲-20入", price: 780, life: "約30天" },
+                    { id: "ym2", name: "雪茄蛋捲-30入", price: 1080, life: "約30天" },
+                    { id: "ym3", name: "臻饌濃巧禮盒-25入", price: 980, life: "約30天" },
+                    { id: "ym4", name: "喜饌濃巧禮盒-40入", price: 1450, life: "約30天" }
+                ]
+            },
+            { 
+                brand: "Happy Turn’s", 
+                image: " https://github.com/kg33813-tech/my-shop-assets/blob/main/Happyturns2.png?raw=true",
+                items: [
+                   { id: "ht1", name: "兩入米果禮盒-(和三盆糖+鹽奶油）", price: 620, life: "約60天" },
+                { id: "ht2", name: "兩入米果禮盒-(和三盆糖+起司）", price: 620, life: "約60天" },
+                { id: "ht3", name: "兩入米果禮盒-(和三盆糖+焦糖巧克力）", price: 620, life: "約60天" },
+                { id: "ht4", name: "兩入米果禮盒-(鹽奶油＋起司）", price: 620, life: "約60天" },
+                { id: "ht5", name: "兩入米果禮盒-(鹽奶油＋焦糖巧克力）", price: 620, life: "約60天" },
+                { id: "ht6", name: "兩入米果禮盒-(起司＋焦糖巧克力）", price: 620, life: "約60天" },
+                { id: "ht7", name: "精緻禮盒30入", price: 880, life: "約60天" }
+                ]
+            },
+            { 
+ 
+                brand: "And The Friet", 
+                image: "https://github.com/kg33813-tech/my-shop-assets/blob/main/And%20The%20Friet.png?raw=true",
+                items: [
+                    { id: "af1", name: "薯條禮盒-5入", price: 590, life: "約60天" },
+                    { id: "af2", name: "薯條禮盒-10入", price: 1050, life: "約60天" }
+                ]
+            },
+            { 
+                brand: "Sugar Butter Tree", 
+                image: "https://github.com/kg33813-tech/my-shop-assets/blob/main/Sugar%20Butter%20Tree.png?raw=true",
+                items: [
+                    { id: "sbt1", name: "招牌奶油夾心餅-7入", price: 280, life: "約50天" },
+                    { id: "sbt2", name: "招牌奶油夾心餅-14入", price: 520, life: "約50天" },
+                    { id: "sbt3", name: "招牌奶油夾心餅-21入", price: 750, life: "約50天" },
+                    { id: "sbt4", name: "綜合夾心餅乾-12入", price: 520, life: "約50天" },
+                    { id: "sbt5", name: "綜合夾心餅乾-16入", price: 680, life: "約50天" },
+                    { id: "sbt6", name: "綜合夾心餅乾-21入", price: 860, life: "約50天" },
+                    { id: "sbt7", name: "PEANUTS 聯名禮盒-12入", price: 690, life: "約50天" },
+                    { id: "sbt8", name: "PEANUTS 聯名禮盒-16入", price: 980, life: "約50天" }
+                ]
+            },
+            { 
+                brand: "Press Butter Sand", 
+                image: "https://github.com/kg33813-tech/my-shop-assets/blob/main/Press%20Butter%20Sand.png?raw=true",
+                items: [
+                    { id: "pbs1", name: "原味奶油夾心餅-5入", price: 460, life: "約14天" },
+                    { id: "pbs2", name: "原味奶油夾心餅-9入", price: 760, life: "約14天" },
+                    { id: "pbs3", name: "草莓夾心餅乾-5入", price: 490, life: "約14天" },
+                    { id: "pbs4", name: "草莓夾心餅乾-9入", price: 820, life: "約14天" },
+                    { id: "pbs5", name: "抹茶夾心餅乾-5入", price: 490, life: "約14天" },
+                    { id: "pbs6", name: "抹茶夾心餅乾-9入", price: 820, life: "約14天" }
+                ]
+            },
+            { 
+                brand: "Pista & Tokyo", 
+                image: "https://github.com/kg33813-tech/my-shop-assets/blob/main/Pista%20&%20Tokyo.png?raw=true",
+                items: [
+                    { id: "pt1", name: "開心果夾心餅-5入", price: 490, life: "約60天" },
+                    { id: "pt2", name: "開心果夾心餅-綜合10入", price: 880, life: "約60天" }
+                ]
+            },
+            { 
+                brand: "源吉兆庵", 
+                image: "https://github.com/kg33813-tech/my-shop-assets/blob/main/kitchoan1.png?raw=true",
+                items: [
+                    { id: "yg1", name: "奶油夾心煎餅-原味6入", price: 450, life: "約40天" },
+                    { id: "yg2", name: "奶油夾心煎餅-抹茶6入", price: 450, life: "約40天" },
+                    { id: "yg3", name: "奶油夾心煎餅-原味12入", price: 880, life: "約40天" },
+                    { id: "yg4", name: "奶油夾心煎餅-綜合12入", price: 880, loop: "約40天" },
+                    { id: "yg5", name: "粹甘肅 -和菓子3入", price: 800, life: "約14天" },
+                    { id: "yg6", name: "粹甘肅 -和菓子4入", price: 1020, life: "約14天" }
+                ]
+            },
+            { 
+                brand: "神戶風月堂", 
+                image: "https://github.com/kg33813-tech/my-shop-assets/blob/main/fugetsudo1.png?raw=true",
+                items: [
+                    { id: "fg1", name: "法蘭酥-6入（香草、草莓、可可）", price: 380, life: "約60天" },
+                    { id: "fg2", name: "法蘭酥-8入（香草、草莓、可可）", price: 480, life: "約60天" },
+                    { id: "fg3", name: "法蘭酥-12入（香草、草莓、可可）", price: 700, life: "約60天" },
+                    { id: "fg4", name: "法蘭酥-6入（紅茶、抹茶、咖啡）", price: 380, life: "約60天" },
+                    { id: "fg5", name: "法蘭酥-8入（紅茶、抹茶、咖啡）", price: 480, life: "約60天" },
+                    { id: "fg6", name: "法蘭酥-12入（紅茶、抹茶、咖啡）", price: 700, life: "約60天" },
+                ]
+            },
+            { 
+                brand: "Tokyo Campanella", 
+                image: "https://github.com/kg33813-tech/my-shop-assets/blob/main/Tokyo%20Campanella1.png?raw=true",
+                items: [
+                    { id: "tc1", name: "巧克力夾心餅乾-5入", price: 380, life: "約30天" },
+                    { id: "tc2", name: "巧克力夾心餅乾-10入", price: 720, life: "約30天" }
+                ]
+            },
+            { 
+                brand: "Tokyo Rich Cheese", 
+                image: "https://github.com/kg33813-tech/my-shop-assets/blob/main/Tokyo%20Rich%20Cheese.png?raw=true",
+                items: [
+                    { id: "trc1", name: "起司蛋糕條-10入", price: 590, life: "約45天" }
+                ]
+            },
+            { 
+                brand: "蝦仙貝之里", 
+                image: "https://github.com/kg33813-tech/my-shop-assets/blob/main/ebisato1.png?raw=true",
+                items: [
+                    { id: "eb1", name: "綜合蝦餅大包裝-280g", price: 370, life: "約90天" }
+                ]
+            },
+            { 
+                brand: " Bâton d'or ", 
+                image: " https://github.com/kg33813-tech/my-shop-assets/blob/main/Batondor.png?raw=true",
+                items: [
+                    { id: "bd1", name: "頂級巧克力棒-砂糖奶油36入", price: 300, life: "約20天" },
+                { id: "bd2", name: "頂級巧克力棒-巧克力20入", price: 300, life: "約20天" },
+                { id: "bd3", name: "頂級巧克力棒-白草莓20入", price: 300, life: "約20天" },
+                { id: "bd4", name: "頂級巧克力棒-抹茶20入", price: 300, life: "約20天" },
+                { id: "bd5", name: "頂級巧克力棒-V.S.O.P20入", price: 300, life: "約20天" },
+                { id: "bd6", name: "頂級巧克力棒-開心果20入", price: 300, life: "約20天" }
+                ]
+            },
+            { 
+ 
+                brand: "茅乃舍", 
+                image: "https://github.com/kg33813-tech/my-shop-assets/blob/main/kubara1.png?raw=true",
+                items: [
+                    { id: "kny1", name: "柴魚昆布高湯-5入", price: 160, life: "約180天" },
+                    { id: "kny2", name: "柴魚昆布高湯-12入", price: 380, life: "約180天" },
+                    { id: "kny3", name: "柴魚昆布高湯(減鹽)-5入", price: 180, life: "約180天" },
+                    { id: "kny4", name: "蔬菜高湯-5入", price: 180, life: "約180天" },
+                    { id: "kny5", name: "蔬菜高湯-12入", price: 420, life: "約180天" },
+                    { id: "kny6", name: "蔬菜高湯(減鹽)-5入", price: 190, life: "約180天" },
+                    { id: "kny7", name: "椎茸高湯-5入", price: 220, life: "約180天" },
+                    { id: "kny8", name: "椎茸高湯-20入", price: 750, life: "約180天" },
+                    { id: "kny9", name: "昆布高湯-5入", price: 180, life: "約180天" },
+                    { id: "kny10", name: "昆布高湯-24入", price: 720, life: "約180天" },
+                    { id: "kny11", name: "雞高湯-5入", price: 230, life: "約180天" },
+                    { id: "kny12", name: "玉子燒-4入", price: 230, life: "約180天" },
+                    { id: "kny13", name: "茶碗蒸-4入", price: 280, life: "約180天" }
+                ]
+            }, 
+        ];
+ 
+        let cart = {};
+        const productContainer = document.getElementById('product-container');
+        const footerTotal = document.getElementById('footer-total');
+        const progressBar = document.getElementById('progress-bar');
+        const shippingMsg = document.getElementById('shipping-msg');
+        const discountHint = document.getElementById('discount-hint');
+ 
+        function init() {
+            renderProducts();
+            attachListeners();
+            calculateTotal();
+        }
+ 
+        function renderProducts() {
+            productsData.forEach(brandGroup => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 group";
+                let itemsHtml = brandGroup.items.map(item => {
+                    cart[item.id] = 0;
+                    return `
+                        <div class="p-4 flex justify-between items-center border-b border-gray-50 last:border-0">
+                            <div class="flex-1 pr-4">
+                                <div class="font-bold text-gray-800 text-sm">${item.name}</div>
+                                <div class="text-[10px] text-gray-400">效期：${item.life}</div>
+                                <div class="text-wagashi font-black text-sm mt-1">NT$ ${item.price.toLocaleString()}</div>
+                            </div>
+                            <div class="flex items-center bg-gray-50 rounded-full px-1 py-1">
+                                <button type="button" onclick="updateQty('${item.id}', -1)" class="btn-qty w-7 h-7 flex items-center justify-center bg-white rounded-full shadow-sm text-gray-400 font-bold">-</button>
+                                <span id="qty-${item.id}" class="w-8 text-center text-xs font-bold text-gray-700 cart-qty-display">0</span>
+                                <button type="button" onclick="updateQty('${item.id}', 1)" class="btn-qty w-7 h-7 flex items-center justify-center bg-wagashi text-white rounded-full shadow-sm font-bold">+</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                card.innerHTML = `
+                    <div class="brand-image-container img-loading"><img src="${brandGroup.image}" alt="${brandGroup.brand}" onload="this.classList.add('loaded'); this.parentElement.classList.remove('img-loading')"></div>
+                    <div class="bg-gray-50/50 px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+                        <h3 class="font-serif font-black text-lg text-gray-800 tracking-wider">${brandGroup.brand}</h3>
+                        ${brandGroup.brand === "主廚市集" ? '<span class="text-[12px] bg-green-600 text-white px-2 py-0.5 rounded-full font-bold">購買主廚市集商品即享全單免運🎁</span>' : ''}
+                    </div>
+                    <div class="divide-y divide-gray-50">${itemsHtml}</div>
+                `;
+                productContainer.appendChild(card);
+            });
+        }
+ 
+        window.updateQty = (id, delta) => {
+            const next = Math.max(0, (cart[id] || 0) + delta);
+            if (cart[id] !== next) { cart[id] = next; document.getElementById(`qty-${id}`).innerText = next; calculateTotal(); }
+        };
+ 
+        function calculateCalculations() {
+            let subtotal = 0, items = [], hasChefMarket = false;
+            productsData.forEach(g => {
+                let brandHasItems = false;
+                g.items.forEach(i => {
+                    if (cart[i.id] > 0) {
+                        subtotal += i.price * cart[i.id];
+                        items.push({ ...i, qty: cart[i.id], brand: g.brand });
+                        brandHasItems = true;
+                    }
+                });
+                if (brandHasItems && g.brand === "主廚市集") hasChefMarket = true;
+            });
+ 
+            const note = document.getElementById('note').value;
+            let discountRate = 1, discountFixed = 0, discountName = "無";
+            
+            if (note.includes("2026馬上發財")) { 
+                discountRate = 0.92; discountName = "馬年發財 92折"; 
+            } else if (note.includes("2026馬上成功")) { 
+                discountRate = 0.95; discountName = "馬年成功 95折"; 
+            } else if (note.includes("2026馬年行大運")) {
+                if (subtotal >= 888) {
+                    discountFixed = 88; discountName = "2026馬年行大運滿額折$88";
+                }
+            }
+ 
+            const isTax = document.getElementById('tax-toggle').checked;
+            const taxFactor = isTax ? 1.05 : 1;
+            const afterTaxAndRate = Math.round(subtotal * taxFactor * discountRate);
+            const finalProductAmount = Math.max(0, afterTaxAndRate - discountFixed);
+            
+            const method = document.getElementById('shippingMethod').value;
+            let shippingFee = 0;
+            if (subtotal > 0 && !hasChefMarket) {
+                if (method === "超商取貨") shippingFee = subtotal >= 1500 ? 0 : 60;
+                else if (method === "宅配到府") shippingFee = subtotal >= 3000 ? 0 : 210;
+            }
+ 
+            return { 
+                subtotal, items, isTax, hasChefMarket, 
+                discountName, 
+                shippingFee, 
+                total: finalProductAmount + shippingFee 
+            };
+        }
+ 
+        function calculateTotal() {
+            const res = calculateCalculations();
+            footerTotal.innerText = res.total.toLocaleString();
+            discountHint.innerText = res.discountName !== "無" ? `已套用: ${res.discountName}` : "";
+ 
+            if (res.hasChefMarket) {
+                progressBar.style.width = "100%"; 
+                shippingMsg.innerText = "冷凍宅配免運達成🎉｜其餘未滿$3000超取免運"; 
+            } else {
+                const percent = Math.min((res.subtotal / 3000) * 100, 100);
+                progressBar.style.width = `${percent}%`;
+                shippingMsg.innerText = res.subtotal >= 3000 ? "已達成！宅配免運 🎉" : (res.subtotal >= 1500 ? "已享超取免運" : "滿 $1,500 超取免運 / $3,000 宅配免運");
+            }
+        }
+ 
+        function attachListeners() {
+            document.getElementById('tax-toggle').addEventListener('change', () => {
+                document.getElementById('tax-input-group').classList.toggle('hidden', !document.getElementById('tax-toggle').checked);
+                calculateTotal();
+            });
+            document.getElementById('shippingMethod').addEventListener('change', calculateTotal);
+            document.getElementById('note').addEventListener('input', calculateTotal);
+            document.getElementById('pre-submit-btn').addEventListener('click', showModal);
+            document.getElementById('close-modal').addEventListener('click', hideModal);
+            document.getElementById('back-edit-btn').addEventListener('click', hideModal);
+            document.getElementById('confirm-submit-btn').addEventListener('click', submitOrder);
+        }
+ 
+        function toggleModal(show) {
+            const m = document.getElementById('modal-overlay');
+            if (show) { 
+                m.classList.remove('hidden', 'pointer-events-none'); 
+                setTimeout(() => { m.classList.add('active'); m.classList.remove('opacity-0'); }, 10); 
+            } else { 
+                m.classList.remove('active'); m.classList.add('opacity-0'); 
+                setTimeout(() => { m.classList.add('hidden', 'pointer-events-none'); }, 300); 
+            }
+        }
+ 
+        function showModal() {
+            const res = calculateCalculations();
+            if (res.items.length === 0) return alert("請至少選擇一項商品");
+            const name = document.getElementById('name').value, 
+                  phone = document.getElementById('phone').value, 
+                  method = document.getElementById('shippingMethod').value, 
+                  addr = document.getElementById('address').value;
+            if (!name || !phone || !method || !addr) return alert("請填寫完整的預購資料");
+ 
+            let listHtml = res.items.map(i => `
+                <div class="py-2 border-b border-gray-50 last:border-0">
+                    <div class="flex justify-between items-start mb-0.5">
+                        <span class="text-xs font-medium text-gray-700 leading-tight">${i.name}</span>
+                        <b class="text-xs text-gray-900 ml-4 shrink-0">NT$ ${(i.price * i.qty).toLocaleString()}</b>
+                    </div>
+                    <div class="text-[10px] text-gray-400">
+                        單價 NT$ ${i.price.toLocaleString()} x 數量 ${i.qty}
+                    </div>
+                </div>
+            `).join('');
+ 
+            document.getElementById('modal-body').innerHTML = `
+                <div class="space-y-4">
+                    <div class="bg-gray-50 p-4 rounded-xl text-[12px] space-y-1 border border-gray-100">
+                        <p><b>訂購人：</b>${name}</p>
+                        <p><b>配送方式：</b>${method}</p>
+                        <p><b>收件地址：</b>${addr}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-400 mb-2 uppercase border-b pb-1">商品明細 (含單價)</p>
+                        ${listHtml}
+                    </div>
+                    <div class="bg-wagashi/5 p-4 rounded-xl space-y-2 mt-4 text-xs font-bold">
+                        <div class="flex justify-between"><span>商品小計</span><span>NT$ ${res.subtotal.toLocaleString()}</span></div>
+                        ${res.isTax ? `<div class="flex justify-between text-gray-500"><span>營業稅 (5%)</span><span>包含於總額</span></div>` : ''}
+                        ${res.discountName !== "無" ? `<div class="flex justify-between text-green-600"><span>折扣 (${res.discountName})</span><span>已套用</span></div>` : ''}
+                        <div class="flex justify-between"><span>配送運費</span><span>+ NT$ ${res.shippingFee.toLocaleString()}</span></div>
+                        <div class="flex justify-between text-lg text-wagashi pt-2 border-t border-wagashi/10"><span>結帳總額</span><span>NT$ ${res.total.toLocaleString()}</span></div>
+                    </div>
+                </div>`;
+            toggleModal(true);
+        }
+ 
+        function hideModal() { toggleModal(false); }
+ 
+        async function submitOrder() {
+            const btn = document.getElementById('confirm-submit-btn');
+            btn.disabled = true; btn.innerText = "傳送中...";
+            const res = calculateCalculations();
+            const orderId = "MA" + Date.now().toString().slice(-4);
+            const data = {
+                orderId, name: document.getElementById('name').value, phone: document.getElementById('phone').value,
+                line: document.getElementById('line').value, shippingMethod: document.getElementById('shippingMethod').value,
+                address: document.getElementById('address').value, detail: res.items.map(i => `${i.name} (單價:${i.price}) x ${i.qty}`).join('\n'),
+                shippingFee: res.shippingFee, discount: res.discountName, total: res.total, isTax: res.isTax ? "是" : "否",
+                taxId: document.getElementById('taxId').value, note: document.getElementById('note').value, orderTime: new Date().toLocaleString('zh-TW')
+            };
+            try { 
+                await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) }); 
+                showSuccess(data); 
+            } catch (e) { 
+                alert("提交失敗，請重新嘗試"); 
+                btn.disabled = false; btn.innerText = "確認送出"; 
+            }
+        }
+ 
+        function showSuccess(data) {
+            document.getElementById('modal-title').innerText = "預購受理成功";
+            document.getElementById('modal-footer-btns').classList.add('hidden');
+            const bank = data.isTax === "是" ? "台灣銀行(004) 111001027133" : "中國信託(822) 101540000605";
+            
+            document.getElementById('modal-body').innerHTML = `
+                <div class="space-y-6">
+                    <!-- 第一區塊：訂單詳細資訊 -->
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 text-xs space-y-2">
+                        <div class="flex justify-between border-b border-gray-200 pb-1 mb-1">
+                            <span class="text-gray-400">訂單編號</span><span class="font-bold text-wagashi">${data.orderId}</span>
+                        </div>
+                        <div class="flex justify-between"><span class="text-gray-400">訂購人</span><span>${data.name}</span></div>
+                        <div class="flex justify-between"><span class="text-gray-400">聯絡電話</span><span>${data.phone}</span></div>
+                        <div class="flex justify-between"><span class="text-gray-400">配送方式</span><span>${data.shippingMethod}</span></div>
+                        <div class="flex flex-col"><span class="text-gray-400 mb-1">收件地址</span><span class="break-words">${data.address}</span></div>
+                        <div class="flex justify-between pt-2 border-t border-gray-200">
+                            <span class="font-bold">總金額</span><span class="text-lg font-black text-wagashi">NT$ ${data.total.toLocaleString()}</span>
+                        </div>
+                    </div>
+ 
+                    <!-- 第二區塊：匯款與公告資訊 -->
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-3">
+                        <div>
+                            <h4 class="text-xs font-bold text-blue-600 mb-1 tracking-widest">💰 匯款資訊</h4>
+                            <div class="bg-white p-3 rounded-lg border border-blue-100 font-mono text-sm font-bold text-center leading-relaxed">
+                                ${bank}
+                            </div>
+                        </div>
+                        <ul class="text-[11px] text-blue-700 font-medium space-y-1.5 list-disc pl-4">
+                            <li>請於三日內完成付款，逾期訂單自動取消</li>
+                            <li>匯款完成後請務必提供帳號後五碼核對</li>
+                        </ul>
+                        <div class="bg-white/50 p-2 rounded text-center">
+                            <p class="text-[11px] font-bold text-gray-700">📅 時程公告：預計 2026.01.27 陸續發貨</p>
+                        </div>
+                    </div>
+ 
+                    <!-- 第三區塊：LINE 導引與按鈕 -->
+                    <div class="text-center space-y-4">
+                        <div class="p-3 bg-yellow-50 rounded-lg border border-yellow-100">
+                            <p class="text-[11px] font-bold text-yellow-800">📸 請截圖本頁面訂購資訊傳至 LINE 官方帳號</p>
+                        </div>
+                        <a href="https://lin.ee/EZDBiB0" target="_blank" class="flex items-center justify-center gap-2 w-full py-4 bg-line text-white rounded-2xl font-bold text-sm shadow-lg active:scale-[0.98] transition-transform">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M24 10.304c0-5.232-5.383-9.488-12-9.488s-12 4.256-12 9.488c0 4.69 4.274 8.604 10.054 9.332.391.084.922.258 1.057.592.12.301.079.77.039 1.074l-.171 1.026c-.052.312-.252 1.22 1.084.665 1.336-.556 7.202-4.24 9.824-7.258 1.76-1.956 2.113-3.693 2.113-5.431z"/></svg>
+                            聯繫満満菓LINE 客服 (@465roorg)
+                        </a>
+                        <button onclick="finishAndHome()" class="text-gray-400 text-xs font-bold hover:text-gray-600 pb-2">
+                            完成並回到首頁
+                        </button>           
+                    </div>
+                </div>`;
+        }
+ 
+        function finishAndHome() {
+            toggleModal(false);
+            setTimeout(() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                for (let key in cart) { cart[key] = 0; }
+                document.querySelectorAll('.cart-qty-display').forEach(el => el.innerText = '0');
+                document.getElementById('order-form-el').reset();
+                document.getElementById('tax-input-group').classList.add('hidden');
+                const submitBtn = document.getElementById('confirm-submit-btn');
+                submitBtn.disabled = false;
+                submitBtn.innerText = "確認送出";
+                document.getElementById('modal-footer-btns').classList.remove('hidden');
+                document.getElementById('modal-title').innerText = "核對訂單內容";
+                calculateTotal();
+            }, 300);
+        }
+ 
+        window.onload = init;
+    </script>
+</body>
+</html>
